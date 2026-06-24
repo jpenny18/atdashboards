@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
@@ -269,8 +269,8 @@ function InvalidProduct() {
   );
 }
 
-// ─── Main Checkout Page ───────────────────────────────────────────────────────
-export default function CheckoutPage() {
+// ─── Checkout content (reads the URL — must live inside <Suspense>) ───────────
+function CheckoutContent() {
   const searchParams = useSearchParams();
   // Accept any casing of the param (productId / productID / productid) so links
   // work no matter how they were written on the external site.
@@ -373,5 +373,21 @@ export default function CheckoutPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+// ─── Page export ──────────────────────────────────────────────────────────────
+// useSearchParams() requires a Suspense boundary for the production build.
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#0d1117] flex items-center justify-center px-4">
+          <Spinner className="w-6 h-6 text-[#8b949e]" />
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }
